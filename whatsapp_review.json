@@ -1,0 +1,162 @@
+{
+  "name": "whatsapp_review",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "return $input.all()[0].json.body.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        48,
+        432
+      ],
+      "name": "Extract Array",
+      "id": "c4c5345a-540c-4260-b5e0-f24fd6500feb"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "c9bbe9b6-30ce-4f5b-8371-5ee6cc8de247",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -176,
+        432
+      ],
+      "name": "Webhook1",
+      "id": "677b7dbf-b7c4-4bd1-aaaf-fe2246e11882",
+      "webhookId": "7b08aff1-bafe-4578-a00b-08a50cfcac6f"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        288,
+        352
+      ],
+      "name": "Loop Over Items1",
+      "id": "250d2cd5-7263-4654-a6f0-06b7953e810d"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v25.0/1161672520354779/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"91{{$json.phone_number}}\",\n  \"type\": \"template\",\n  \"template\": {\n    \"name\": \"google_review\",\n    \"language\": {\n      \"code\": \"en\"\n    },\n    \"components\": [\n      {\n        \"type\": \"body\",\n        \"parameters\": [\n          {\n            \"type\": \"text\",\n            \"text\": \"{{$json.name}}\"\n          },\n          {\n            \"type\": \"text\",\n            \"text\": \"https://sudeshnas.info/codezsols_infotech/ci_dev/user_files/msit/web_frontend/review/index.html?cus_id={{$json.cus_id}}&name={{encodeURIComponent($json.name)}}\"\n          }\n        ]\n      }\n    ]\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        560,
+        352
+      ],
+      "name": "WhatsApp1",
+      "id": "d0072f0c-484c-456a-98ec-6eb2ff7ff7f8",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "H9MiFRZS4EQu8dWS",
+          "name": "rambiswas_whatsapp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sudeshnas.info/codezsols_infotech/ci_dev/user_files/msit/backend/api/review/update_status.php",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"cus_id\": {{ $('Extract Array').item.json.cus_id }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        784,
+        352
+      ],
+      "name": "Update DB Status1",
+      "id": "c525bbe1-02f8-41e1-8873-ae9d62490b7f"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract Array": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Extract Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "WhatsApp1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp1": {
+      "main": [
+        [
+          {
+            "node": "Update DB Status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update DB Status1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "e68ee12f-c94e-4b68-9eb4-b8fd486e15b5",
+  "meta": {
+    "instanceId": "1a070f62fd570f9b448428174e26a566e2f1c714d4e4fbaf2aaf4bac52e484ca"
+  },
+  "id": "x0z7HWgoF5B3szu9",
+  "tags": []
+}
